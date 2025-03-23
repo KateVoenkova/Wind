@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Управление персонажами: {{ book.title }}</h1>
+        <a href="{{ url_for('book_page', book_id=book.id) }}" class="btn">← Назад</a>
+
+        <div class="characters-list">
+            {% for character in characters %}
+                <div class="character-item">
+                    <form method="POST" action="{{ url_for('edit_character', character_id=character.id) }}">
+                        <input type="text" name="name" value="{{ character.name }}" placeholder="Имя">
+                        <textarea name="description" placeholder="Описание">{{ character.description or '' }}</textarea>
+                        <button type="submit">✏️ Сохранить</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('delete_character', character_id=character.id) }}">
+                        <button type="submit" class="danger">🗑️ Удалить</button>
+                    </form>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

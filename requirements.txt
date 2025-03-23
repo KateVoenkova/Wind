@@ -1,0 +1,8 @@
+flask
+flask-sqlalchemy
+flask-migrate
+flask-bcrypt
+pyjwt
+pymorphy2
+chardet
+python-dotenv
