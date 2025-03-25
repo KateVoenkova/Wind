@@ -182,11 +182,27 @@ def upload():
     return render_template('books/upload.html')
 
 
-@app.route('/books/<int:book_id>')
+@app.route('/books/<int:book_id>', methods=['GET', 'POST'])
 def book_page(book_id):
     book = Book.query.get_or_404(book_id)
+    edit_mode = request.args.get('edit', 'false').lower() == 'true'
+
+    if request.method == 'POST':
+        if book.user_id != current_user.id and not current_user.is_admin:
+            flash('Доступ запрещен', 'danger')
+            return redirect(url_for('library'))
+
+        book.title = request.form['title']
+        book.description = request.form['description']
+        db.session.commit()
+        flash('Изменения сохранены', 'success')
+        return redirect(url_for('book_page', book_id=book.id))
+
     characters = Character.query.filter_by(book_id=book_id).all()
-    return render_template('books/detail.html', book=book, characters=characters)
+    return render_template('books/detail.html',
+                           book=book,
+                           characters=characters,
+                           edit_mode=edit_mode)
 
 
 @app.route('/books/<int:book_id>/edit', methods=['GET', 'POST'])
@@ -246,7 +262,6 @@ def edit_character(character_id):
     db.session.commit()
     flash('Изменения сохранены', 'success')
     return redirect(url_for('character_details', character_id=character.id))
-
 
 @app.route('/characters/<int:character_id>/delete', methods=['POST'])
 @login_required

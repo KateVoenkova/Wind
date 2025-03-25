@@ -1,0 +1,104 @@
+body {
+    background-color: #f8f9fa;
+    padding-top: 56px;
+}
+
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,.04);
+}
+
+.book-card {
+    transition: transform .2s;
+}
+
+.book-card:hover {
+    transform: translateY(-5px);
+}
+
+#graph {
+    border: 1px solid #dee2e6;
+    border-radius: .25rem;
+    background: white;
+}
+
+.character-node {
+    cursor: pointer;
+    transition: fill .3s;
+}
+
+.character-node:hover {
+    fill: #dc3545;
+}
+
+circle {
+    stroke: #fff;
+    stroke-width: 2px;
+    filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.2));
+}
+
+#graph-container {
+    border: 1px solid #ddd;
+    margin: 20px 0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+text {
+    font-family: Arial;
+    fill: #333;
+    pointer-events: none;
+    text-shadow: 1px 1px 2px white;
+}
+
+/* Стили для кнопок */
+#graph-container button {
+    margin: 0 5px;
+    padding: 5px 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+#graph-container button:hover {
+    background: #f8f9fa;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Добавьте в styles.css */
+.character-form {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.character-form .form-control[readonly] {
+    background-color: #f8f9fa;
+    cursor: not-allowed;
+}
+
+.character-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+/* Добавим в конец файла */
+.btn-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-group .btn {
+    flex: 1;
+}
+
+.book-title-input {
+    font-size: 1.5rem;
+    font-weight: bold;
+    padding: 0.5rem;
+}
+
+.book-description-textarea {
+    min-height: 100px;
+}

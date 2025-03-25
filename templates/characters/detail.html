@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}{{ character.name }}{% endblock %}
+
+{% block content %}
+<div class="card shadow">
+    <div class="card-header bg-white">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2>{{ character.name }}</h2>
+            <a href="{{ url_for('book_page', book_id=character.book.id) }}"
+               class="btn btn-outline-secondary">← Назад</a>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('edit_character', character_id=character.id) }}">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">Имя персонажа:</label>
+                        <input type="text" name="name" value="{{ character.name }}" class="form-control" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">Нормализованное имя:</label>
+                        <input type="text" value="{{ character.normalized_name }}" class="form-control" readonly>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Описание:</label>
+                <textarea name="description" class="form-control" rows="4">{{ character.description }}</textarea>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+
+                {% if current_user.is_admin %}
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                    Удалить персонажа
+                </button>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal для подтверждения удаления -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Подтверждение удаления</h5>
+                <button type="button" class="btn-close" data-bs-close="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Вы уверены, что хотите удалить персонажа "{{ character.name }}"?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <form method="POST" action="{{ url_for('delete_character', character_id=character.id) }}">
+                    <button type="submit" class="btn btn-danger">Удалить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
