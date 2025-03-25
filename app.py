@@ -324,17 +324,4 @@ if __name__ == '__main__':
             db.session.add(admin)
             db.session.commit()
 
-        # Создание тестовых данных
-        if not Book.query.count():
-            books_data = [
-                {'title': 'Война и мир', 'description': 'Эпический роман Л.Н. Толстого'},
-                {'title': 'Унесенные ветром', 'description': 'История гражданской войны в США'}
-            ]
-            for data in books_data:
-                book = Book(**data, user_id=admin.id)
-                db.session.add(book)
-            db.session.commit()
-
-        os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-
     app.run(debug=True)
