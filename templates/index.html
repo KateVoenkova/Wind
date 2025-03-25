@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>Библиотека</h1>
+
+    <!-- Форма загрузки -->
+    <form method="POST" enctype="multipart/form-data">
+        <input type="text" name="title" placeholder="Название книги" required>
+        <input type="file" name="file" required>
+        <button type="submit">Загрузить</button>
+    </form>
+
+    <!-- Список книг -->
+    <div class="books">
+        <!-- Внутри цикла отображения книг -->
+        {% for book in books %}
+            <div class="book-item">
+                <a href="{{ url_for('book_page', book_id=book.id) }}">{{ book.title }}</a>
+                <form action="{{ url_for('delete_book', book_id=book.id) }}" method="POST" style="display: inline;">
+                    <button type="submit" onclick="return confirm('Удалить книгу?')">🗑️</button>
+                </form>
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

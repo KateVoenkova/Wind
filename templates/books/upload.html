@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="upload-form">
+    <h2>Добавить новую книгу</h2>
+
+    {% if error %}
+        <div class="alert error">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+            <label>Название книги:</label>
+            <input type="text" name="title" required>
+        </div>
+
+        <div class="form-group">
+            <label>Текстовый файл:</label>
+            <input type="file" name="file" accept=".txt" required>
+        </div>
+
+        <button type="submit" class="btn">Загрузить</button>
+        <a href="{{ url_for('library') }}" class="btn cancel">Отмена</a>
+    </form>
+</div>
+{% endblock %}

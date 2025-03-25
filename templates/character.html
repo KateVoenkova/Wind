@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <a href="{{ url_for('book_page', book_id=character.book.id) }}" class="btn">← Назад к книге</a>
+        <div class="character-card">
+            <h1>{{ character.name }}</h1>
+            <div class="metadata">
+                <span class="label">Нормализованное имя:</span>
+                <span class="value">{{ character.normalized_name }}</span>
+            </div>
+            <div class="description">
+                <h3>Описание:</h3>
+                <p>{{ character.description or "Описание отсутствует" }}</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

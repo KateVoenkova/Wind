@@ -6,3 +6,4 @@ pyjwt
 pymorphy2
 chardet
 python-dotenv
+flask_bootstrap

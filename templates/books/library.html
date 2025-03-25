@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Библиотека{% endblock %}
+
+{% block content %}
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    {% for book in books %}
+    <div class="col">
+        <div class="card book-card h-100 shadow">
+            <div class="card-body">
+                <h5 class="card-title">{{ book.title }}</h5>
+                <p class="card-text text-muted">
+                    <small>Автор:
+                        <a href="{{ url_for('user_profile', username=book.author.username) }}"
+                           class="text-decoration-none">
+                            {{ book.author.username }}
+                        </a>
+                    </small>
+                </p>
+                <p class="card-text">{{ book.description|truncate(150) }}</p>
+            </div>
+            <div class="card-footer bg-white">
+                <a href="{{ url_for('show_graph', book_id=book.id) }}"
+                   class="btn btn-sm btn-outline-primary">
+                    Граф связей
+                </a>
+                <a href="{{ url_for('book_page', book_id=book.id) }}"
+                   class="btn btn-sm btn-outline-secondary">
+                    Подробнее
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Управление персонажами{% endblock %}
+
+{% block content %}
+<div class="card shadow">
+    <div class="card-header bg-white">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2>Управление персонажами: {{ book.title }}</h2>
+            <a href="{{ url_for('book_page', book_id=book.id) }}"
+               class="btn btn-outline-secondary">← Назад</a>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <div class="row g-3">
+            {% for character in characters %}
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <form method="POST"
+                              action="{{ url_for('edit_character', character_id=character.id) }}">
+                            <div class="mb-3">
+                                <input type="text"
+                                       name="name"
+                                       value="{{ character.name }}"
+                                       class="form-control"
+                                       required>
+                            </div>
+                            <div class="mb-3">
+                                <textarea name="description"
+                                          class="form-control"
+                                          rows="3">{{ character.description }}</textarea>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-warning">Сохранить</button>
+                                <form method="POST"
+                                      action="{{ url_for('delete_character', character_id=character.id) }}">
+                                    <button type="submit"
+                                            class="btn btn-danger"
+                                            onclick="return confirm('Удалить персонажа?')">
+                                        Удалить
+                                    </button>
+                                </form>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="auth-form">
+    <h2>Авторизация</h2>
+    {% if error %}
+        <div class="alert error">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('auth') }}">
+        <input type="text" name="username" placeholder="Логин" required>
+        <input type="password" name="password" placeholder="Пароль" required>
+        <button type="submit" class="btn">Войти</button>
+    </form>
+
+    <hr>
+
+    <h3>Регистрация</h3>
+    <form method="POST" action="{{ url_for('register') }}">
+        <input type="text" name="username" placeholder="Новый логин" required>
+        <input type="password" name="password" placeholder="Пароль" required>
+        <button type="submit" class="btn">Зарегистрироваться</button>
+    </form>
+</div>
+{% endblock %}

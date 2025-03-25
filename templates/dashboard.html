@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="header">
+        <h1>Личный кабинет: {{ current_user.username }}</h1>
+        <a href="{{ url_for('logout') }}" class="btn">Выйти</a>
+    </div>
+
+    <div class="actions">
+        <a href="{{ url_for('upload') }}" class="btn">Загрузить книгу</a>
+        <a href="{{ url_for('library') }}" class="btn">Общая библиотека</a>
+    </div>
+</div>
+{% endblock %}

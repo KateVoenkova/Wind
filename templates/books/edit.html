@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>Редактирование книги</h1>
+    <form method="POST">
+        <input type="text"
+               name="title"
+               value="{{ book.title }}"
+               placeholder="Новое название"
+               required>
+        <button type="submit">Сохранить</button>
+        <a href="{{ url_for('book_page', book_id=book.id) }}">Отмена</a>
+    </form>
+</body>
+</html>

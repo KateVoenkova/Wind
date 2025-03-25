@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Граф связей — {{ book.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>{{ book.title }}</h2>
+                <a href="{{ url_for('book_page', book_id=book.id) }}" class="btn btn-outline-secondary">← Назад к книге</a>
+            </div>
+        </div>
+        <div class="card-body">
+            <div id="graph-container" data-book-id="{{ book.id }}"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="{{ url_for('static', filename='js/graph.js') }}"></script>
+{% endblock %}
