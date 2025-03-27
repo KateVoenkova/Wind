@@ -172,6 +172,10 @@ def upload():
                 db.session.add(character)
 
             db.session.commit()
+
+            # Добавляем этот вызов для анализа отношений между персонажами
+            find_relationships(new_book.id, filepath)
+
             flash('Книга успешно загружена!', 'success')
             return redirect(url_for('book_page', book_id=new_book.id))
 
@@ -180,7 +184,6 @@ def upload():
             flash(f'Ошибка: {str(e)}', 'danger')
 
     return render_template('books/upload.html')
-
 
 @app.route('/books/<int:book_id>', methods=['GET', 'POST'])
 def book_page(book_id):
