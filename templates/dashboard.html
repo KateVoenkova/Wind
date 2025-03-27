@@ -4,12 +4,16 @@
 <div class="dashboard">
     <div class="header">
         <h1>Личный кабинет: {{ current_user.username }}</h1>
-        <a href="{{ url_for('logout') }}" class="btn">Выйти</a>
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary">Выйти</a>
     </div>
 
-    <div class="actions">
-        <a href="{{ url_for('upload') }}" class="btn">Загрузить книгу</a>
-        <a href="{{ url_for('library') }}" class="btn">Общая библиотека</a>
+    <div class="actions mt-4">
+        <a href="{{ url_for('upload') }}" class="btn btn-primary">
+            <i class="fas fa-upload me-2"></i>Загрузить книгу
+        </a>
+        <a href="{{ url_for('library') }}" class="btn btn-outline-primary">
+            <i class="fas fa-book-open me-2"></i>Общая библиотека
+        </a>
     </div>
 </div>
 {% endblock %}

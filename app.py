@@ -128,6 +128,8 @@ def library():
 @app.route('/upload', methods=['GET', 'POST'])
 @login_required
 def upload():
+    if not (request.referrer and url_for('dashboard') in request.referrer):
+        return redirect(url_for('dashboard'))
     if request.method == 'POST':
         try:
             file = request.files['file']
