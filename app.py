@@ -3,7 +3,7 @@ from flask_bootstrap import Bootstrap
 from flask_migrate import Migrate
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import db, User, Book, Character, CharacterRelationship
+from models import db, User, Book, Character, CharacterRelationship, BookAnalysis
 from name_parser import get_names_from_file
 from relationships import find_relationships
 import os
@@ -316,6 +316,80 @@ def get_graph_data(book_id):
     } for rel in relationships]
 
     return jsonify({"nodes": nodes, "links": links})
+
+
+# ---------------------------
+# Работа с анализами книг
+# ---------------------------
+
+@app.route('/books/<int:book_id>/add_analysis', methods=['GET', 'POST'])
+@login_required
+def add_analysis(book_id):
+    book = Book.query.get_or_404(book_id)
+
+    if request.method == 'POST':
+        title = request.form.get('title', '').strip()
+        content = request.form.get('content', '').strip()
+
+        if not title or not content:
+            flash('Заполните все обязательные поля', 'danger')
+            return redirect(url_for('add_analysis', book_id=book.id))
+
+        # Обработка файла, если он загружен
+        if 'file' in request.files and request.files['file'].filename:
+            file = request.files['file']
+            if file.filename.lower().endswith('.txt'):
+                try:
+                    content = file.read().decode('utf-8')
+                except UnicodeDecodeError:
+                    try:
+                        content = file.read().decode('windows-1251')
+                    except:
+                        flash('Ошибка декодирования файла', 'danger')
+                        return redirect(url_for('add_analysis', book_id=book.id))
+
+        new_analysis = BookAnalysis(
+            title=title,
+            content=content,
+            user_id=current_user.id,
+            book_id=book.id
+        )
+        db.session.add(new_analysis)
+        db.session.commit()
+
+        flash('Анализ успешно добавлен', 'success')
+        return redirect(url_for('book_page', book_id=book.id))
+
+    return render_template('books/add_analysis.html', book=book)
+
+
+@app.route('/books/<int:book_id>/analyses')
+def view_analyses(book_id):
+    book = Book.query.get_or_404(book_id)
+    analyses = BookAnalysis.query.filter_by(book_id=book.id).order_by(BookAnalysis.created_at.desc()).all()
+    return render_template('books/analyses.html', book=book, analyses=analyses)
+
+
+@app.route('/analysis/<int:analysis_id>')
+def view_analysis(analysis_id):
+    analysis = BookAnalysis.query.get_or_404(analysis_id)
+    return render_template('books/analysis_detail.html', analysis=analysis)
+
+
+@app.route('/analysis/<int:analysis_id>/delete', methods=['POST'])
+@login_required
+def delete_analysis(analysis_id):
+    analysis = BookAnalysis.query.get_or_404(analysis_id)
+
+    if analysis.user_id != current_user.id and not current_user.is_admin:
+        flash('Доступ запрещен', 'danger')
+        return redirect(url_for('view_analyses', book_id=analysis.book_id))
+
+    db.session.delete(analysis)
+    db.session.commit()
+
+    flash('Анализ удален', 'success')
+    return redirect(url_for('view_analyses', book_id=analysis.book_id))
 
 
 # ---------------------------
