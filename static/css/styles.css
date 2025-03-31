@@ -125,3 +125,22 @@ text {
     background: #3a5f8a;
     transform: translateY(-1px);
 }
+
+.was-validated .form-control:invalid, .form-control.is-invalid {
+    border-color: #dc3545;
+}
+.was-validated .form-control:valid, .form-control.is-valid {
+    border-color: #198754;
+}
+.invalid-feedback {
+    display: none;
+    color: #dc3545;
+}
+.was-validated .form-control:invalid ~ .invalid-feedback {
+    display: block;
+}
+
+.btn-custom {
+    padding: 0.5rem 1rem !important;
+    font-size: 1.25rem !important;
+}

@@ -128,42 +128,47 @@ def library():
 @app.route('/upload', methods=['GET', 'POST'])
 @login_required
 def upload():
-    if not (request.referrer and url_for('dashboard') in request.referrer):
-        return redirect(url_for('dashboard'))
     if request.method == 'POST':
         try:
-            file = request.files['file']
-            title = request.form['title']
-            description = request.form.get('description', '')
-
-            if not file or file.filename == '':
+            # Проверяем обязательные поля
+            if 'file' not in request.files or not request.files['file'].filename:
                 flash('Файл не выбран', 'danger')
                 return redirect(url_for('upload'))
 
-            if not file.filename.endswith('.txt'):
+            file = request.files['file']
+            title = request.form.get('title', '').strip()
+
+            if not title:
+                flash('Введите название книги', 'danger')
+                return redirect(url_for('upload'))
+
+            if not file.filename.lower().endswith('.txt'):
                 flash('Поддерживаются только TXT-файлы', 'danger')
                 return redirect(url_for('upload'))
 
-            # Сохранение файла
+            # Создаем папку uploads если её нет
+            os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+            # Сохраняем файл
             filename = f"{uuid.uuid4()}.txt"
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(filepath)
 
-            # Парсинг имен
-            names = get_names_from_file(filepath)
-            if not names:
-                raise ValueError("Не найдено имен персонажей")
-
-            # Создание книги
+            # Создаем книгу в БД
             new_book = Book(
                 title=title,
-                description=description,
+                description=request.form.get('description', ''),
                 user_id=current_user.id
             )
             db.session.add(new_book)
             db.session.commit()
 
-            # Добавление персонажей
+            # Обрабатываем файл
+            names = get_names_from_file(filepath)
+            if not names:
+                raise ValueError("Не найдено имен персонажей")
+
+            # Добавляем персонажей
             for name in names:
                 character = Character(
                     name=name,
@@ -175,17 +180,19 @@ def upload():
 
             db.session.commit()
 
-            # Добавляем этот вызов для анализа отношений между персонажами
+            # Анализируем связи
             find_relationships(new_book.id, filepath)
 
             flash('Книга успешно загружена!', 'success')
             return redirect(url_for('book_page', book_id=new_book.id))
 
         except Exception as e:
-            logger.error(f"Ошибка: {str(e)}")
-            flash(f'Ошибка: {str(e)}', 'danger')
+            db.session.rollback()
+            logger.error(f"Ошибка загрузки: {str(e)}", exc_info=True)
+            flash(f'Ошибка загрузки: {str(e)}', 'danger')
 
     return render_template('books/upload.html')
+
 
 @app.route('/books/<int:book_id>', methods=['GET', 'POST'])
 def book_page(book_id):

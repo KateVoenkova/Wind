@@ -1,22 +1,100 @@
 {% extends "base.html" %}
 
+{% block title %}Главная страница{% endblock %}
+
 {% block content %}
-    <div class="hero">
-        <h1>Анализ литературных произведений</h1>
-        <p>Платформа для визуализации социальных сетей персонажей классических произведений</p>
-    </div>
+<div class="container mt-4">
+    <!-- Подключение Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <div class="comparison">
-        <div class="work-card">
-            <h2>Война и мир</h2>
-            <p>Эпическое полотно Л.Н. Толстого с 559 персонажами...</p>
-            <a href="/graph/1" class="btn">Показать сеть</a>
-        </div>
-
-        <div class="work-card">
-            <h2>Унесённые ветром</h2>
-            <p>История Скарлетт О'Хара в условиях Гражданской войны...</p>
-            <a href="/graph/2" class="btn">Показать сеть</a>
+    <!-- Hero Section -->
+    <div class="card shadow mb-5">
+        <div class="card-body p-5 text-center bg-light rounded">
+            <h1 class="display-4 mb-4">Анализ литературных произведений</h1>
+            <p class="lead">Визуализируйте связи между персонажами и исследуйте структуру произведений</p>
         </div>
     </div>
+
+    <!-- Purpose Section -->
+    <div class="card shadow mb-5">
+        <div class="card-header bg-white">
+            <h2 class="h3 mb-0">Для чего нужен этот сайт</h2>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-4 mb-md-0">
+                    <div class="h-100 p-4 bg-light rounded">
+                        <h3 class="h4"><i class="fas fa-book-open me-2"></i>Анализ текста</h3>
+                        <p>Загружайте тексты литературных произведений, и система автоматически определит персонажей и их взаимосвязи.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="h-100 p-4 bg-light rounded">
+                        <h3 class="h4"><i class="fas fa-project-diagram me-2"></i>Визуализация</h3>
+                        <p>Наглядные графики показывают частоту взаимодействий между персонажами и помогают понять структуру произведения.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comparison Section -->
+    <div class="card shadow mb-5">
+        <div class="card-header bg-white">
+            <h2 class="h3 mb-0">Сравнительный анализ произведений</h2>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-4 mb-md-0">
+                    <div class="h-100 p-4 bg-light rounded">
+                        <h3 class="h4">"Война и мир" Л.Н. Толстого</h3>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Более 500 персонажей</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Сложная иерархия взаимоотношений</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Исторический контекст влияет на связи</li>
+                            <li><i class="fas fa-check-circle text-success me-2"></i>Множество семейных кланов</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="h-100 p-4 bg-light rounded">
+                        <h3 class="h4">"Унесённые ветром" М. Митчелл</h3>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Около 50 основных персонажей</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Ярко выраженные центральные персонажи</li>
+                            <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Романтические связи преобладают</li>
+                            <li><i class="fas fa-check-circle text-success me-2"></i>Социальные изменения как фон для отношений</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graph Introduction Section -->
+    <div class="card shadow">
+        <div class="card-header bg-white">
+            <h2 class="h3 mb-0">Исследуйте графы связей</h2>
+        </div>
+        <div class="card-body text-center">
+            <p class="lead mb-4">Наши интерактивные графы помогут вам по-новому взглянуть на знакомые произведения</p>
+
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                <a href="{{ url_for('library') }}" class="btn btn-primary btn-lg px-4 py-2">
+                    <i class="fas fa-book me-2"></i>Библиотека
+                </a>
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('upload') }}" class="btn btn-success btn-lg px-4 py-2">
+                        <i class="fas fa-upload me-2"></i>Загрузить книгу
+                    </a>
+                {% endif %}
+                    <a href="{{ url_for('register') }}" class="btn btn-info btn-lg px-4 py-2">
+                        <i class="fas fa-user-plus me-2"></i>Зарегистрироваться
+                    </a>
+
+            </div>
+
+        </div>
+    </div>
+</div>
 {% endblock %}

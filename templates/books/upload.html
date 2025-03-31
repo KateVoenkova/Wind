@@ -1,26 +1,55 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="upload-form">
-    <h2>Добавить новую книгу</h2>
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-body">
+            <h2 class="mb-4">Добавить новую книгу</h2>
 
-    {% if error %}
-        <div class="alert error">{{ error }}</div>
-    {% endif %}
+            {% include 'partials/flash_messages.html' %}
 
-    <form method="POST" enctype="multipart/form-data">
-        <div class="form-group">
-            <label>Название книги:</label>
-            <input type="text" name="title" required>
+            <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                <div class="mb-3">
+                    <label for="title" class="form-label">Название книги</label>
+                    <input type="text" class="form-control" id="title" name="title" required>
+                    <div class="invalid-feedback">Пожалуйста, введите название</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="description" class="form-label">Описание (необязательно)</label>
+                    <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label for="file" class="form-label">Текстовый файл</label>
+                    <input class="form-control" type="file" id="file" name="file" accept=".txt" required>
+                    <div class="invalid-feedback">Выберите текстовый файл</div>
+                    <div class="form-text">Поддерживаются только файлы в формате TXT</div>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Отмена</a>
+                    <button type="submit" class="btn btn-primary">Загрузить</button>
+                </div>
+            </form>
         </div>
-
-        <div class="form-group">
-            <label>Текстовый файл:</label>
-            <input type="file" name="file" accept=".txt" required>
-        </div>
-
-        <button type="submit" class="btn">Загрузить</button>
-        <a href="{{ url_for('library') }}" class="btn cancel">Отмена</a>
-    </form>
+    </div>
 </div>
+
+<script>
+// Валидация формы на клиенте
+(function() {
+    'use strict'
+    const forms = document.querySelectorAll('.needs-validation')
+    Array.from(forms).forEach(form => {
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault()
+                event.stopPropagation()
+            }
+            form.classList.add('was-validated')
+        }, false)
+    })
+})()
+</script>
 {% endblock %}
