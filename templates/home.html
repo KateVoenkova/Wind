@@ -87,11 +87,14 @@
                     <a href="{{ url_for('upload') }}" class="btn btn-success btn-lg px-4 py-2">
                         <i class="fas fa-upload me-2"></i>Загрузить книгу
                     </a>
-                {% endif %}
-                    <a href="{{ url_for('register') }}" class="btn btn-info btn-lg px-4 py-2">
-                        <i class="fas fa-user-plus me-2"></i>Зарегистрироваться
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-info btn-lg px-4 py-2">
+                        <i class="fas fa-user me-2"></i>Личный кабинет
                     </a>
-
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="btn btn-info btn-lg px-4 py-2">
+                        <i class="fas fa-sign-in-alt me-2"></i>Войти
+                    </a>
+                {% endif %}
             </div>
 
         </div>

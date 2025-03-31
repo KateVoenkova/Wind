@@ -1,19 +1,154 @@
 {% extends "base.html" %}
 
-{% block content %}
-<div class="dashboard">
-    <div class="header">
-        <h1>Личный кабинет: {{ current_user.username }}</h1>
-        <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary">Выйти</a>
-    </div>
+{% block title %}Личный кабинет{% endblock %}
 
-    <div class="actions mt-4">
-        <a href="{{ url_for('upload') }}" class="btn btn-primary">
-            <i class="fas fa-upload me-2"></i>Загрузить книгу
-        </a>
-        <a href="{{ url_for('library') }}" class="btn btn-outline-primary">
-            <i class="fas fa-book-open me-2"></i>Общая библиотека
-        </a>
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- Боковое меню -->
+        <div class="col-md-3">
+            <div class="card shadow mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Меню</h5>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#books" data-bs-toggle="tab">Мои книги</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#analyses" data-bs-toggle="tab">Мои рецензии</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#archive" data-bs-toggle="tab">Архив</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Основной контент -->
+        <div class="col-md-9">
+            <div class="tab-content">
+                <!-- Вкладка "Мои книги" -->
+                <div class="tab-pane fade show active" id="books">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <h4>Мои книги</h4>
+                        <a href="{{ url_for('upload') }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus"></i> Добавить книгу
+                        </a>
+                    </div>
+                        <div class="card-body">
+                            {% if current_user.books|rejectattr('is_deleted')|list %}
+                            <div class="row row-cols-1 row-cols-md-2 g-4">
+                                {% for book in current_user.books if not book.is_deleted %}
+                                <div class="col">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ book.title }}</h5>
+                                            <p class="card-text">{{ book.description|truncate(100) }}</p>
+                                            <a href="{{ url_for('book_page', book_id=book.id) }}" class="btn btn-primary btn-sm">Подробнее</a>
+                                            <form method="POST" action="{{ url_for('archive_book', book_id=book.id) }}" class="d-inline">
+                                                <button type="submit" class="btn btn-warning btn-sm">В архив</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div class="alert alert-info">У вас пока нет добавленных книг</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Вкладка "Мои рецензии" -->
+                <div class="tab-pane fade" id="analyses">
+                    <div class="card shadow">
+                        <div class="card-header bg-white">
+                            <h4>Мои резензии</h4>
+                        </div>
+                        <div class="card-body">
+                            {% if current_user.analyses|rejectattr('is_deleted')|list %}
+                            <div class="list-group">
+                                {% for analysis in current_user.analyses if not analysis.is_deleted %}
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h5>{{ analysis.title }}</h5>
+                                            <small class="text-muted">Книга: {{ analysis.book.title }}</small>
+                                            <p class="mb-1">{{ analysis.content|truncate(150) }}</p>
+                                        </div>
+                                        <div>
+                                            <a href="{{ url_for('view_analysis', analysis_id=analysis.id) }}" class="btn btn-sm btn-primary">Открыть</a>
+                                            <form method="POST" action="{{ url_for('archive_analysis', analysis_id=analysis.id) }}" class="d-inline">
+                                                <button type="submit" class="btn btn-sm btn-warning">В архив</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div class="alert alert-info">У вас пока нет добавленных рецензий</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Вкладка "Архив" -->
+                <div class="tab-pane fade" id="archive">
+                    <div class="card shadow">
+                        <div class="card-header bg-white">
+                            <h4>Архив</h4>
+                        </div>
+                        <div class="card-body">
+                            <h5>Книги</h5>
+                            {% if current_user.books|selectattr('is_deleted')|list %}
+                            <div class="row row-cols-1 row-cols-md-2 g-4">
+                                {% for book in current_user.books if book.is_deleted %}
+                                <div class="col">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ book.title }}</h5>
+                                            <p class="card-text text-muted"><small>В архиве</small></p>
+                                            <form method="POST" action="{{ url_for('restore_book', book_id=book.id) }}" class="d-inline">
+                                                <button type="submit" class="btn btn-success btn-sm">Восстановить</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div class="alert alert-info">В архиве нет книг</div>
+                            {% endif %}
+
+                            <h5 class="mt-4">Анализы</h5>
+                            {% if current_user.analyses|selectattr('is_deleted')|list %}
+                            <div class="list-group">
+                                {% for analysis in current_user.analyses if analysis.is_deleted %}
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h5>{{ analysis.title }}</h5>
+                                            <small class="text-muted">Книга: {{ analysis.book.title }}</small>
+                                            <p class="mb-1 text-muted"><small>В архиве</small></p>
+                                        </div>
+                                        <form method="POST" action="{{ url_for('restore_analysis', analysis_id=analysis.id) }}">
+                                            <button type="submit" class="btn btn-success btn-sm">Восстановить</button>
+                                        </form>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div class="alert alert-info">В архиве нет рецензий</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

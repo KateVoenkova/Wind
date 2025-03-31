@@ -104,7 +104,19 @@ def logout():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    return render_template('dashboard.html', user=current_user)
+    # Получаем только неудаленные книги и анализы
+    books = Book.query.filter_by(user_id=current_user.id, is_deleted=False).all()
+    analyses = BookAnalysis.query.filter_by(user_id=current_user.id, is_deleted=False).all()
+
+    # Получаем архивные данные
+    archived_books = Book.query.filter_by(user_id=current_user.id, is_deleted=True).all()
+    archived_analyses = BookAnalysis.query.filter_by(user_id=current_user.id, is_deleted=True).all()
+
+    return render_template('dashboard.html',
+                           books=books,
+                           analyses=analyses,
+                           archived_books=archived_books,
+                           archived_analyses=archived_analyses)
 
 
 @app.route('/user/<username>')
@@ -121,7 +133,8 @@ def user_profile(username):
 
 @app.route('/library')
 def library():
-    books = Book.query.all()
+    # Получаем только НЕархивные книги (is_deleted=False)
+    books = Book.query.filter_by(is_deleted=False).all()
     return render_template('books/library.html', books=books)
 
 
@@ -196,7 +209,7 @@ def upload():
 
 @app.route('/books/<int:book_id>', methods=['GET', 'POST'])
 def book_page(book_id):
-    book = Book.query.get_or_404(book_id)
+    book = Book.query.filter_by(id=book_id, is_deleted=False).first_or_404()
     edit_mode = request.args.get('edit', 'false').lower() == 'true'
 
     if request.method == 'POST':
@@ -390,6 +403,68 @@ def delete_analysis(analysis_id):
 
     flash('Анализ удален', 'success')
     return redirect(url_for('view_analyses', book_id=analysis.book_id))
+
+#---------------------------
+# Личный кабинет и его тайны
+#---------------------------
+
+# Архивация и восстановление книг
+@app.route('/books/<int:book_id>/archive', methods=['POST'])
+@login_required
+def archive_book(book_id):
+    book = Book.query.get_or_404(book_id)
+    if book.user_id != current_user.id and not current_user.is_admin:
+        flash('Доступ запрещен', 'danger')
+        return redirect(url_for('dashboard'))
+
+    book.is_deleted = True  # Помечаем как архивную
+    db.session.commit()
+    flash('Книга перемещена в архив', 'success')
+    return redirect(url_for('dashboard'))
+
+
+@app.route('/books/<int:book_id>/restore', methods=['POST'])
+@login_required
+def restore_book(book_id):
+    book = Book.query.get_or_404(book_id)
+    if book.user_id != current_user.id and not current_user.is_admin:
+        flash('Доступ запрещен', 'danger')
+        return redirect(url_for('dashboard'))
+
+    book.is_deleted = False
+    db.session.commit()
+    flash('Книга восстановлена из архива', 'success')
+    return redirect(url_for('dashboard'))
+
+
+# Архивация и восстановление анализов
+@app.route('/analyses/<int:analysis_id>/archive', methods=['POST'])
+@login_required
+def archive_analysis(analysis_id):
+    analysis = BookAnalysis.query.get_or_404(analysis_id)
+    if analysis.user_id != current_user.id and not current_user.is_admin:
+        flash('Доступ запрещен', 'danger')
+        return redirect(url_for('dashboard'))
+
+    analysis.is_deleted = True
+    db.session.commit()
+    flash('Анализ перемещен в архив', 'success')
+    return redirect(url_for('dashboard'))
+
+
+@app.route('/analyses/<int:analysis_id>/restore', methods=['POST'])
+@login_required
+def restore_analysis(analysis_id):
+    analysis = BookAnalysis.query.get_or_404(analysis_id)
+    if analysis.user_id != current_user.id and not current_user.is_admin:
+        flash('Доступ запрещен', 'danger')
+        return redirect(url_for('dashboard'))
+
+    analysis.is_deleted = False
+    db.session.commit()
+    flash('Анализ восстановлен из архива', 'success')
+    return redirect(url_for('dashboard'))
+
 
 
 # ---------------------------

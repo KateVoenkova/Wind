@@ -17,6 +17,7 @@ class Book(db.Model):
     title = db.Column(db.String(255), nullable=False)
     description = db.Column(db.Text)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    is_deleted = db.Column(db.Boolean, default=False)
     characters = db.relationship('Character', backref='book', lazy=True)
     analyses = db.relationship('BookAnalysis', backref='book', lazy=True)
 
@@ -25,6 +26,7 @@ class BookAnalysis(db.Model):
     title = db.Column(db.String(255), nullable=False)
     content = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    is_deleted = db.Column(db.Boolean, default=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     book_id = db.Column(db.Integer, db.ForeignKey('book.id'), nullable=False)
     user = db.relationship('User', backref='analyses')
