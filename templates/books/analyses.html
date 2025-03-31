@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Анализы — {{ book.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>Анализы произведения "{{ book.title }}"</h2>
+                <a href="{{ url_for('book_page', book_id=book.id) }}" class="btn btn-outline-secondary">← Назад</a>
+            </div>
+        </div>
+
+        <div class="card-body">
+            {% if current_user.is_authenticated %}
+            <div class="mb-4">
+                <a href="{{ url_for('add_analysis', book_id=book.id) }}" class="btn btn-primary">
+                    Добавить новую рецензию
+                </a>
+            </div>
+            {% endif %}
+
+            {% if analyses %}
+            <div class="list-group">
+                {% for analysis in analyses %}
+                <div class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5>{{ analysis.title }}</h5>
+                            <p class="mb-1">
+                                <small class="text-muted">
+                                    Добавлено: {{ analysis.user.username }}
+                                    {{ analysis.created_at.strftime('%d.%m.%Y %H:%M') }}
+                                </small>
+                            </p>
+                            <p>{{ analysis.content|truncate(200) }}</p>
+                        </div>
+                        <div>
+                            <a href="{{ url_for('view_analysis', analysis_id=analysis.id) }}"
+                               class="btn btn-sm btn-outline-primary">
+                                Читать
+                            </a>
+                            {% if current_user.id == analysis.user_id or current_user.is_admin %}
+                            <form method="POST"
+                                  action="{{ url_for('delete_analysis', analysis_id=analysis.id) }}"
+                                  class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                        onclick="return confirm('Удалить этот анализ?')">
+                                    Удалить
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                Пока нет анализов для этого произведения.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

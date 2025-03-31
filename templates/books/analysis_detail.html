@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}{{ analysis.title }} — {{ analysis.book.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2>{{ analysis.title }}</h2>
+                    <p class="mb-0 text-muted">
+                        Анализ произведения "{{ analysis.book.title }}"
+                    </p>
+                </div>
+                <a href="{{ url_for('view_analyses', book_id=analysis.book.id) }}"
+                   class="btn btn-outline-secondary">
+                    ← Назад к списку
+                </a>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="mb-4">
+                <p class="text-muted">
+                    Автор: {{ analysis.user.username }} |
+                    Дата: {{ analysis.created_at.strftime('%d.%m.%Y %H:%M') }}
+                </p>
+            </div>
+
+            <div class="analysis-content">
+                {{ analysis.content|replace('\n', '<br>')|safe }}
+            </div>
+        </div>
+
+        {% if current_user.id == analysis.user_id or current_user.is_admin %}
+        <div class="card-footer bg-white">
+            <form method="POST"
+                  action="{{ url_for('delete_analysis', analysis_id=analysis.id) }}"
+                  class="d-inline">
+                <button type="submit" class="btn btn-danger"
+                        onclick="return confirm('Удалить этот анализ?')">
+                    Удалить
+                </button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
