@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Авторы произведений{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>Авторы произведений</h2>
+                <a href="{{ url_for('library') }}" class="btn btn-outline-secondary">← Назад в библиотеку</a>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+                <!-- Колонка с алфавитным указателем -->
+                <div class="col-md-3">
+                    <div class="list-group sticky-top" style="top: 20px;">
+                        {% for letter in alphabet %}
+                        <a href="#letter-{{ letter }}" class="list-group-item list-group-item-action">
+                            {{ letter }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Колонка с авторами -->
+                <div class="col-md-9">
+                    {% for letter, authors in authors_by_letter.items() %}
+                    <div id="letter-{{ letter }}" class="mb-4">
+                        <h3 class="mb-3">{{ letter }}</h3>
+                        <div class="row row-cols-1 row-cols-md-2 g-4">
+                            {% for author in authors %}
+                            <div class="col">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title">
+                                            <a href="{{ url_for('author_books', author_name=author.name) }}"
+                                               class="text-decoration-none">
+                                                {{ author.name }}
+                                            </a>
+                                        </h5>
+                                        <p class="card-text">
+                                            <small class="text-muted">
+                                                Книг: {{ author.book_count }}
+                                            </small>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

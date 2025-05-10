@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>{{ title }}</h2>
+                <a href="{{ url_for('library') }}" class="btn btn-outline-secondary">
+                    ← Назад в библиотеку
+                </a>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+                <!-- Алфавитный указатель -->
+                <div class="col-md-3 mb-3 mb-md-0">
+                    <div class="list-group sticky-top" style="top: 20px;">
+                        {% for letter in alphabet %}
+                        <a href="#letter-{{ letter }}"
+                           class="list-group-item list-group-item-action {{ 'active' if authors_by_letter.get(letter) }}">
+                            {{ letter }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Список авторов -->
+                <div class="col-md-9">
+                    {% for letter in alphabet if authors_by_letter.get(letter) %}
+                    <div id="letter-{{ letter }}" class="mb-5">
+                        <h3 class="border-bottom pb-2 mb-3">{{ letter }}</h3>
+                        <div class="row row-cols-1 row-cols-md-2 g-4">
+                            {% for author in authors_by_letter[letter] %}
+                            <div class="col">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h5 class="card-title">
+                                            <a href="{{ url_for('author_detail',
+                                                last_name=author.last_name,
+                                                first_name=author.first_name,
+                                                middle_name=author.middle_name if author.middle_name else 'None') }}"
+                                               class="text-decoration-none">
+                                                {{ author.full_name }}
+                                            </a>
+                                        </h5>
+                                        <p class="card-text">
+                                            <span class="badge bg-primary rounded-pill">
+                                                {{ author.book_count }} {{ 'книга' if author.book_count == 1 else 'книг' }}
+                                            </span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

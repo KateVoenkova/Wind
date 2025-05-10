@@ -6,11 +6,16 @@
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Библиотека</h1>
-        {% if current_user.is_authenticated %}
-            <a href="{{ url_for('upload') }}" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Добавить книгу
+        <div>
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('upload') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Добавить книгу
+                </a>
+            {% endif %}
+            <a href="{{ url_for('authors_index') }}" class="btn btn-info ms-2">
+                <i class="fas fa-users"></i> Все авторы
             </a>
-        {% endif %}
+        </div>
     </div>
 
     {% if books %}
@@ -20,14 +25,26 @@
             <div class="card h-100 shadow">
                 <div class="card-body">
                     <h5 class="card-title">{{ book.title }}</h5>
-                    <p class="card-text text-muted">
-                        <small>Автор:
-                            <a href="{{ url_for('user_profile', username=book.author.username) }}"
+                    <div class="card-text text-muted mb-2">
+                        <div class="mb-1">
+                            <span class="fw-semibold">Автор:</span>
+                            <a href="{{ url_for('author_detail',
+                                  last_name=book.author_last_name,
+                                  first_name=book.author_first_name,
+                                  middle_name=book.author_middle_name if book.author_middle_name else 'None') }}"
                                class="text-decoration-none">
-                                {{ book.author.username }}
+                                {{ book.author_last_name }} {{ book.author_first_name }}
+                                {% if book.author_middle_name %}{{ book.author_middle_name }}{% endif %}
                             </a>
-                        </small>
-                    </p>
+                        </div>
+                        <div class="mt-2">
+                            <span class="fw-semibold">Добавил:</span>
+                            <a href="{{ url_for('user_profile', username=book.uploaded_by.username) }}"
+                               class="text-decoration-none ms-2 badge bg-info text-dark">
+                                <i class="fas fa-user"></i> {{ book.uploaded_by.username }}
+                            </a>
+                        </div>
+                    </div>
                     <p class="card-text">{{ book.description|truncate(150) }}</p>
                 </div>
                 <div class="card-footer bg-white">

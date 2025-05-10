@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>
+                    <i class="fas fa-user-edit"></i> {{ author_name }}
+                </h2>
+                <div>
+                    <a href="{{ url_for('authors_index') }}" class="btn btn-outline-secondary me-2">
+                        ← Все авторы
+                    </a>
+                    <a href="{{ url_for('library') }}" class="btn btn-outline-primary">
+                        ← В библиотеку
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        {% if books %}
+        <div class="card-header bg-light">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="fw-bold">Загрузил:</span>
+                    <a href="{{ url_for('user_profile', username=books[0].uploaded_by.username) }}"
+                       class="text-decoration-none ms-2">
+                        <i class="fas fa-user"></i> {{ books[0].uploaded_by.username }}
+                    </a>
+                </div>
+                <span class="badge bg-primary rounded-pill">
+                    {{ books|length }} {{ 'книга' if books|length == 1 else 'книг' }}
+                </span>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="card-body">
+            {% if books %}
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                {% for book in books %}
+                <div class="col">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ book.title }}</h5>
+                            <div class="card-text text-muted mb-2">
+                                <div>
+                                    <span class="fw-semibold">Добавил:</span>
+                                    <a href="{{ url_for('user_profile', username=book.uploaded_by.username) }}"
+                                       class="text-decoration-none">
+                                        {{ book.uploaded_by.username }}
+                                    </a>
+                                </div>
+                            </div>
+                            <p class="card-text">{{ book.description|truncate(100) }}</p>
+                        </div>
+                        <div class="card-footer bg-white">
+                            <a href="{{ url_for('book_page', book_id=book.id) }}"
+                               class="btn btn-sm btn-primary">
+                                Подробнее
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                Нет книг этого автора в библиотеке.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

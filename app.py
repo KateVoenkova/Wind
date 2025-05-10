@@ -1,3 +1,6 @@
+from collections import defaultdict
+from sqlalchemy import func
+from flask import render_template, request, redirect, url_for, flash, current_app
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, make_response
 from flask_bootstrap import Bootstrap
 from flask_migrate import Migrate
@@ -123,8 +126,12 @@ def dashboard():
 @login_required
 def user_profile(username):
     user = User.query.filter_by(username=username).first_or_404()
-    books = Book.query.filter_by(user_id=user.id).all()
-    return render_template('user/profile.html', user=user, books=books)
+    books = Book.query.filter_by(user_id=user.id, is_deleted=False).all()
+
+    return render_template('user/profile.html',
+                           user=user,
+                           books=books,
+                           title=f"Профиль {username}")
 
 
 # ---------------------------
@@ -143,13 +150,20 @@ def library():
 def upload():
     if request.method == 'POST':
         try:
-            # Проверяем обязательные поля
-            if 'file' not in request.files or not request.files['file'].filename:
+            # Проверки
+            if 'file' not in request.files:
                 flash('Файл не выбран', 'danger')
                 return redirect(url_for('upload'))
 
             file = request.files['file']
             title = request.form.get('title', '').strip()
+            author_last_name = request.form.get('author_last_name', '').strip()
+            author_first_name = request.form.get('author_first_name', '').strip()
+            #author_middle_name = request.form.get('author_middle_name', '').strip()
+
+            if not author_last_name or not author_first_name:
+                flash('Укажите фамилию и имя автора', 'danger')
+                return redirect(url_for('upload'))
 
             if not title:
                 flash('Введите название книги', 'danger')
@@ -170,8 +184,11 @@ def upload():
             # Создаем книгу в БД
             new_book = Book(
                 title=title,
-                description=request.form.get('description', ''),
-                user_id=current_user.id
+                user_id=current_user.id,  # Устанавливаем связь через user_id
+                author_last_name=request.form.get('author_last_name', '').strip(),
+                author_first_name=request.form.get('author_first_name', '').strip(),
+                author_middle_name=request.form.get('author_middle_name', '').strip() or None,
+                description=request.form.get('description', '')
             )
             db.session.add(new_book)
             db.session.commit()
@@ -257,6 +274,143 @@ def delete_book(book_id):
     db.session.commit()
     flash('Книга удалена', 'success')
     return redirect(url_for('library'))
+
+
+# ---------------------------
+# Авторы
+# ---------------------------
+
+@app.route('/authors')
+def authors_index():
+    try:
+        # Получаем всех уникальных авторов с количеством книг
+        authors_data = db.session.query(
+            Book.author_last_name,
+            Book.author_first_name,
+            Book.author_middle_name,
+            func.count(Book.id).label('book_count')
+        ).filter(
+            Book.author_last_name.isnot(None),
+            Book.is_deleted == False
+        ).group_by(
+            Book.author_last_name,
+            Book.author_first_name,
+            Book.author_middle_name
+        ).order_by(
+            Book.author_last_name,
+            Book.author_first_name,
+            Book.author_middle_name
+        ).all()
+
+        # Группируем по первой букве фамилии
+        authors_by_letter = defaultdict(list)
+        for author in authors_data:
+            if author.author_last_name:  # Проверка на случай пустого значения
+                first_letter = author.author_last_name[0].upper()
+                full_name = f"{author.author_last_name} {author.author_first_name}"
+                if author.author_middle_name:
+                    full_name += f" {author.author_middle_name}"
+
+                authors_by_letter[first_letter].append({
+                    'full_name': full_name,
+                    'last_name': author.author_last_name,
+                    'first_name': author.author_first_name,
+                    'middle_name': author.author_middle_name,
+                    'book_count': author.book_count
+                })
+
+        # Русский алфавит для указателя
+        alphabet = [chr(i) for i in range(1040, 1072)]  # А-Я
+
+        return render_template('books/authors_index.html',
+                               authors_by_letter=authors_by_letter,
+                               alphabet=alphabet,
+                               title="Все авторы")
+    except Exception as e:
+        current_app.logger.error(f"Error in authors_index: {str(e)}")
+        flash('Произошла ошибка при загрузке списка авторов', 'danger')
+        return redirect(url_for('library'))
+
+
+@app.route('/author')
+def author_redirect():
+    """Перенаправление для случая, если перешли без параметров"""
+    return redirect(url_for('authors_index'))
+
+
+@app.route('/author/<last_name>_<first_name>')
+@app.route('/author/<last_name>_<first_name>_<middle_name>')
+def author_detail(last_name, first_name, middle_name=None):
+    try:
+        # Находим книги автора
+        query = Book.query.filter(
+            Book.author_last_name == last_name,
+            Book.author_first_name == first_name,
+            Book.is_deleted == False
+        )
+
+        if middle_name and middle_name != 'None':
+            query = query.filter(Book.author_middle_name == middle_name)
+        else:
+            query = query.filter(or_(
+                Book.author_middle_name.is_(None),
+                Book.author_middle_name == ''
+            ))
+
+        books = query.order_by(Book.title).all()
+
+        # Формируем полное имя для заголовка
+        full_name = f"{last_name} {first_name}"
+        if middle_name and middle_name != 'None':
+            full_name += f" {middle_name}"
+
+        return render_template('books/author_detail.html',
+                               author_name=full_name,
+                               last_name=last_name,
+                               first_name=first_name,
+                               middle_name=middle_name,
+                               books=books,
+                               title=f"Автор: {full_name}")
+    except Exception as e:
+        current_app.logger.error(f"Error in author_detail: {str(e)}")
+        flash('Произошла ошибка при загрузке страницы автора', 'danger')
+        return redirect(url_for('authors_index'))
+
+
+# Дополнительные маршруты для API (если нужно)
+@app.route('/api/authors')
+def api_authors_list():
+    """JSON API для получения списка авторов"""
+    authors = db.session.query(
+        Book.author_name,
+        func.count(Book.id).label('book_count')
+    ).filter(
+        Book.author_name.isnot(None)
+    ).group_by(
+        Book.author_name
+    ).order_by(
+        Book.author_name
+    ).all()
+
+    return jsonify([{
+        'name': author.author_name,
+        'book_count': author.book_count
+    } for author in authors])
+
+@app.route('/api/author/<author_name>/books')
+def api_author_books(author_name):
+    """JSON API для получения книг автора"""
+    books = Book.query.filter(
+        Book.author_name == author_name,
+        Book.is_deleted == False
+    ).order_by(Book.title).all()
+
+    return jsonify([{
+        'id': book.id,
+        'title': book.title,
+        'description': book.description,
+        'uploader': book.author.username
+    } for book in books])
 
 
 # ---------------------------
